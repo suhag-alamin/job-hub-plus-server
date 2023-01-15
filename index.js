@@ -124,16 +124,6 @@ const run = async () => {
       res.send({ status: false });
     });
 
-    // get applied jobs by email
-    app.get("/applied-jobs/:email", async (req, res) => {
-      const email = req.params.email;
-      const query = { applicants: { $elemMatch: { email: email } } };
-      const cursor = jobCollection.find(query).project({ applicants: 0 });
-      const result = await cursor.toArray();
-
-      res.send({ status: true, data: result });
-    });
-
     // get all jobs
     app.get("/jobs", async (req, res) => {
       const cursor = jobCollection.find({});
@@ -162,6 +152,14 @@ const run = async () => {
     app.post("/apply", async (req, res) => {
       const applicantData = req.body;
       const result = await appliedJobCollection.insertOne(applicantData);
+      res.send({ status: true, data: result });
+    });
+    // get job by email
+    app.get("/applied-jobs/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { candidateEmail: email };
+      const cursor = appliedJobCollection.find(query);
+      const result = await cursor.toArray();
       res.send({ status: true, data: result });
     });
   } finally {

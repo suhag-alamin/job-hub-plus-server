@@ -27,6 +27,7 @@ const run = async () => {
     const database = client.db("jobHubPlus");
     const userCollection = database.collection("users");
     const jobCollection = database.collection("jobs");
+    const appliedJobCollection = database.collection("appliedJobs");
 
     // create user
     app.post("/user", async (req, res) => {
@@ -48,24 +49,24 @@ const run = async () => {
       res.send({ status: false });
     });
 
-    app.patch("/apply", async (req, res) => {
-      const userId = req.body.userId;
-      const jobId = req.body.jobId;
-      const email = req.body.email;
+    // app.patch("/apply", async (req, res) => {
+    //   const userId = req.body.userId;
+    //   const jobId = req.body.jobId;
+    //   const email = req.body.email;
 
-      const filter = { _id: ObjectId(jobId) };
-      const updateDoc = {
-        $push: { applicants: { id: ObjectId(userId), email } },
-      };
+    //   const filter = { _id: ObjectId(jobId) };
+    //   const updateDoc = {
+    //     $push: { applicants: { id: ObjectId(userId), email } },
+    //   };
 
-      const result = await jobCollection.updateOne(filter, updateDoc);
+    //   const result = await jobCollection.updateOne(filter, updateDoc);
 
-      if (result.acknowledged) {
-        return res.send({ status: true, data: result });
-      }
+    //   if (result.acknowledged) {
+    //     return res.send({ status: true, data: result });
+    //   }
 
-      res.send({ status: false });
-    });
+    //   res.send({ status: false });
+    // });
 
     app.patch("/query", async (req, res) => {
       const userId = req.body.userId;
@@ -123,6 +124,7 @@ const run = async () => {
       res.send({ status: false });
     });
 
+    // get applied jobs by email
     app.get("/applied-jobs/:email", async (req, res) => {
       const email = req.params.email;
       const query = { applicants: { $elemMatch: { email: email } } };
@@ -132,12 +134,14 @@ const run = async () => {
       res.send({ status: true, data: result });
     });
 
+    // get all jobs
     app.get("/jobs", async (req, res) => {
       const cursor = jobCollection.find({});
       const result = await cursor.toArray();
       res.send({ status: true, data: result });
     });
 
+    // get job by id
     app.get("/job/:id", async (req, res) => {
       const id = req.params.id;
 
@@ -145,11 +149,19 @@ const run = async () => {
       res.send({ status: true, data: result });
     });
 
+    // post job
     app.post("/job", async (req, res) => {
       const job = req.body;
 
       const result = await jobCollection.insertOne(job);
 
+      res.send({ status: true, data: result });
+    });
+
+    // apply for job
+    app.post("/apply", async (req, res) => {
+      const applicantData = req.body;
+      const result = await appliedJobCollection.insertOne(applicantData);
       res.send({ status: true, data: result });
     });
   } finally {

@@ -162,6 +162,13 @@ const run = async () => {
       const result = await cursor.toArray();
       res.send({ status: true, data: result });
     });
+    // delete or cancel a applied job
+    app.delete("/cancel-applied-job/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await appliedJobCollection.deleteOne(query);
+      res.send({ status: true, data: result });
+    });
   } finally {
   }
 };

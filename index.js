@@ -162,6 +162,13 @@ const run = async () => {
       const result = await cursor.toArray();
       res.send({ status: true, data: result });
     });
+    app.get("/posted-jobs/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { employerEmail: email };
+      const cursor = jobCollection.find(query);
+      const result = await cursor.toArray();
+      res.send({ status: true, data: result });
+    });
     // delete or cancel a applied job
     app.delete("/cancel-applied-job/:id", async (req, res) => {
       const id = req.params.id;

@@ -151,8 +151,28 @@ const run = async () => {
     // apply for job
     app.post("/apply", async (req, res) => {
       const applicantData = req.body;
-      const result = await appliedJobCollection.insertOne(applicantData);
-      res.send({ status: true, data: result });
+      const jobId = req.body.jobId;
+      const userId = req.body.userId;
+
+      // check if the job exists in job collection
+      const job = await jobCollection.findOne({ _id: ObjectId(jobId) });
+
+      if (!job) {
+        return res
+          .status(404)
+          .send({ status: false, message: "Job not found" });
+      }
+
+      // Update the applicants field in jobCollection
+      const updateResult = await jobCollection.updateOne(
+        { _id: ObjectId(jobId) },
+        { $addToSet: { applicants: userId } }
+      );
+
+      // Insert the applicant data into appliedJobCollection
+      const insertResult = await appliedJobCollection.insertOne(applicantData);
+
+      res.send({ status: true, data: insertResult });
     });
     // get job by email
     app.get("/applied-jobs/:email", async (req, res) => {

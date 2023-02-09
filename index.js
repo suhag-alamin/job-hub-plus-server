@@ -148,6 +148,14 @@ const run = async () => {
       res.send({ status: true, data: result });
     });
 
+    // delete or cancel posted job
+    app.delete("/job/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await jobCollection.deleteOne(query);
+      res.send({ status: true, data: result });
+    });
+
     // apply for job
     app.post("/apply", async (req, res) => {
       const applicantData = req.body;

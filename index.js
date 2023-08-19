@@ -190,6 +190,7 @@ const run = async () => {
       const result = await cursor.toArray();
       res.send({ status: true, data: result });
     });
+
     app.get("/posted-jobs/:email", async (req, res) => {
       const email = req.params.email;
       const query = { employerEmail: email };
@@ -202,6 +203,22 @@ const run = async () => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await appliedJobCollection.deleteOne(query);
+      res.send({ status: true, data: result });
+    });
+
+    // get jobs by userIds and jobId
+    app.post("/applicants", async (req, res) => {
+      const applicants = req.body.applicants;
+      const jobId = req.body.jobId;
+
+      // Construct a query to match both the job ID and user IDs $and operator
+      const query = {
+        jobId: jobId,
+        userId: { $in: applicants },
+      };
+
+      const cursor = appliedJobCollection.find(query);
+      const result = await cursor.toArray();
       res.send({ status: true, data: result });
     });
   } finally {

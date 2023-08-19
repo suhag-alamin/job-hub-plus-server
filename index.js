@@ -139,6 +139,39 @@ const run = async () => {
       res.send({ status: true, data: result });
     });
 
+    // search jobs
+
+    app.post("/search-jobs", async (req, res) => {
+      const { searchTerm } = req.query;
+
+      const searchCriteria = {
+        $or: [
+          { position: { $regex: searchTerm, $options: "i" } },
+          { companyName: { $regex: searchTerm, $options: "i" } },
+          {
+            skills: {
+              $elemMatch: {
+                $regex: searchTerm,
+                $options: "i",
+              },
+            },
+          },
+        ],
+      };
+
+      try {
+        const searchResults = await jobCollection
+          .find(searchCriteria)
+          .toArray();
+        res.json({ status: true, data: searchResults });
+      } catch (error) {
+        console.error("Error searching jobs:", error);
+        res
+          .status(500)
+          .json({ status: false, message: "Internal server error" });
+      }
+    });
+
     // post job
     app.post("/job", async (req, res) => {
       const job = req.body;
